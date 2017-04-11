@@ -7,6 +7,7 @@ import tensorflow as tf
 import fcn8_vgg_ours
 import numpy as np
 import pdb
+import os
 
 RGB_IMG = 0
 GT_IMG = 1
@@ -17,7 +18,7 @@ WIDTH = 500
 HEIGHT = 500
 logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s',
                     level=logging.INFO,
-                    stream=sys.stdout)
+                    filename="train.log")
 
 def load_training_set(train_file, valid_file):
     '''
@@ -132,7 +133,16 @@ sess.run(init_glb)
 sess.run(init_loc)
 coord = tf.train.Coordinator()
 threads = tf.train.start_queue_runners(sess=sess, coord=coord)
+ckpt_dir = "./checkpoints"
+if not os.path.exists(ckpt_dir):
+    os.makedirs(ckpt_dir)
+ckpt = tf.train.get_checkpoint_state(ckpt_dir)
 start = 0
+if ckpt and ckpt.model_checkpoint_path:
+    start = int(ckpt.model_checkpoint_path.split("-")[1]) - 1
+    print("start by epoch: %d"%(start))
+    saver = tf.train.Saver()
+    saver.restore(sess, ckpt.model_checkpoint_path)
 last_save_epoch = start
 try:
     for i in range(start, NUM_EPOCHS):
@@ -155,19 +165,7 @@ except KeyboardInterrupt:
     print("get keyboard interrupt")
     if (i - last_save_epoch > 100):
         model_saver = tf.train.Saver()
+        save_ckpt = "checkpoint.ckpt"
         model_saver.save(sess, "checkpoints/" + save_ckpt, global_step=i+1)
 
 print("done")
-
-
-
-
-
-
-
-
-
-
-
-
-
