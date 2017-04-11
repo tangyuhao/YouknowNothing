@@ -7,7 +7,7 @@ import tensorflow as tf
 import fcn8_vgg_ours
 import numpy as np
 import pdb
-import os
+import os, glob
 
 RGB_IMG = 0
 GT_IMG = 1
@@ -139,7 +139,7 @@ if not os.path.exists(ckpt_dir):
 ckpt = tf.train.get_checkpoint_state(ckpt_dir)
 start = 0
 if ckpt and ckpt.model_checkpoint_path:
-    start = int(ckpt.model_checkpoint_path.split("-")[1]) - 1
+    start = int(ckpt.model_checkpoint_path.split("-")[1])
     print("start by epoch: %d"%(start))
     saver = tf.train.Saver()
     saver.restore(sess, ckpt.model_checkpoint_path)
@@ -157,6 +157,10 @@ try:
             summary = sess.run(merged_summary, feed_dict={batch_images:input_, labels:label_})
             train_writer.add_summary(summary, i)
         if i % 1000 == 0 and i > start:
+            # delete old checkpoints
+            files = glob.glob("checkpoints/checkpoint.ckpt-*")
+            for filename in files:
+                os.remove(filename)
             save_ckpt = "checkpoint.ckpt"
             model_saver = tf.train.Saver()
             last_save_epoch = i
