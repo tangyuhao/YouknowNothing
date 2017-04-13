@@ -510,7 +510,8 @@ def pixel_wise_cross_entropy(logits, labels, num_classes):
                 labels=tf.to_int32(labels/255), logits=logits)) 
     # weight decay
     lambda_ = 5**(-4)
-    l2_loss = tf.add_n([tf.nn.l2_loss(v) for v in tf.trainable_variables()])
+    #l2_loss = tf.add_n([tf.nn.l2_loss(v) for v in tf.trainable_variables()])
+    l2_loss = tf.add_n(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES), name='l2_weight_loss')
     cross_entropy += lambda_*l2_loss
     return cross_entropy
 

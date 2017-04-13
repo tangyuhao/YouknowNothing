@@ -4,6 +4,9 @@ DAVIS
 checkpoints
 checkpoints_backup
 train_summary
+checkpoint_save
+summary_save
+test
 
 
 

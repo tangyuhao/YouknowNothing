@@ -105,7 +105,7 @@ batch_images = tf.expand_dims(images, 0)
 
 vgg_fcn = fcn8_vgg_ours.FCN8VGG()
 with tf.name_scope("content_vgg"):
-    vgg_fcn.build(batch_images, debug=True)
+    vgg_fcn.build(batch_images, train = True, debug=True)
 
 
 
@@ -115,7 +115,7 @@ tf.summary.scalar('pixel_wise_cross_entropy_loss', loss)
 merged_summary = tf.summary.merge_all()
 train_writer = tf.summary.FileWriter('./train_summary', sess.graph)
 
-train_step = tf.train.AdamOptimizer(1e-4,0.9).minimize(loss)
+train_step = tf.train.AdamOptimizer(1e-6,0.9).minimize(loss)
 logging.info("********* CNN constructed *********")
 
 train_file = "./all_train_imgs.csv"
@@ -153,7 +153,7 @@ try:
         start_time = time.time()
         train_step.run(feed_dict={batch_images:input_, labels:label_})
         print('Train: time elapsed: %.3fs.'%(time.time()-start_time))
-        if i % 20 == 0 and i > start:
+        if i % 40 == 0 and i > start:
             summary = sess.run(merged_summary, feed_dict={batch_images:input_, labels:label_})
             train_writer.add_summary(summary, i)
         if i % 1000 == 0 and i > start:
