@@ -87,6 +87,7 @@ for idx in range(len(test_clips)):
         output_seg_path = os.path.join(output_seg_folders[idx], image_names[j][:-4]+".png")
         print("outputSegPath:",output_seg_path)
         if need_box_path in box_paths:
+            continue
             # good case
             cur_mask = scp.misc.imread(need_box_path,'L')
             msk_layer = np.expand_dims(cur_mask, axis = 2)
@@ -100,6 +101,16 @@ for idx in range(len(test_clips)):
             scp.misc.imsave(output_seg_path, output_segmentation)
         else:
             # bad case
-            pass
+            last_msk_name = image_names[j-1][:-4] + ".png"
+            last_msk_path = os.path.join(output_seg_folders[idx], last_msk_name)
+            cur_mask = scp.misc.imread(last_msk_path,'L')
+            msk_layer = np.expand_dims(cur_mask, axis = 2)
+            input_tensor = np.append(cur_img, msk_layer, 2)
+            tensors = [vgg_fcn.pred_up]
+            feed_dict = {images: input_tensor}
+            [up_result] = sess.run(tensors, feed_dict=feed_dict)
+            output_segmentation = utils.color_image(up_result[0])
+
+            scp.misc.imsave(output_seg_path, output_segmentation)
 
 
